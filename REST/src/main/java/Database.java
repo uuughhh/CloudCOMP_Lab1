@@ -1,3 +1,4 @@
+import java.net.ResponseCache;
 import java.util.Hashtable;
 
 import javax.ws.rs.GET;
@@ -22,18 +23,40 @@ public class Database {
 
     @POST
 	@Path("{id},{mark}")
-    public String addRecord(@PathParam("id")String id, @PathParam("mark")String mark) {
+    public Response addRecord(@PathParam("id")String id, @PathParam("mark")String mark) {
         // Add a record using id as key and mark as value
-        table.put(id,String.valueOf(mark));
+        table.put(id,Integer.parseInt(mark));
+        System.out.println("ID: "+id);
+        System.out.println("Mark: "+mark);
+        return Response.status(200).build();
     }
 
     @GET
 	@Produces(MediaType.TEXT_PLAIN)
-    public String getMark() {
-    // Retrieve a record using id as key
+    public Response getMark(@QueryParam("id") String id) {
+        // Retrieve a record using id as key
+        Integer mark = table.get(id);
+        if (mark==null){
+            System.out.println("The ID does not exist.");
+            return "";
+        } else {
+            System.out.println("The mark is: "+mark);
+            return mark;
+        }
+        
     }
 
-    public String updateRecord() {
-    // Update a record using id as key and mark as value
+    @POST
+	@Path("{id},{mark}")
+    public String updateRecord(@PathParam("id")String id, @PathParam("mark")String mark) {
+        // Update a record using id as key and mark as value
+        Integer result = table.replace(id,mark);
+        if (result==null){
+            System.out.println("The ID does not exist");
+            return Response.status(404).build();
+        } else {
+            System.out.println("The record with ID "+id+" has been updated with value "+mark);
+            return Response.status(200).build();
+        }
     }
 }
